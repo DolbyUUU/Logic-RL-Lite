@@ -11,10 +11,9 @@ It leverages the following key components:
 
 ---
 
-## Datasets
+## Dataset
 
-### Knights and Knaves (K&K) Logic Puzzle
-For this logic puzzle, imagine there are two types of people: **Knights** and **Knaves**.  
+Knights and Knaves (K&K) Logic Puzzle: Imagine there are two types of people: **Knights** and **Knaves**.  
 - **Knights** always tell the truth.  
 - **Knaves** always lie.  
 
@@ -22,8 +21,8 @@ The K&K dataset is designed to test logical reasoning capabilities by presenting
 
 ---
 
-### Execute the Trainer
-After configuring your WandB, GPUs, and other settings, use the following script:  
+## Training
+After configuring your WandB, GPUs, and other settings, execute the training:  
 ```bash
 bash run_rl_trainer_xxx.sh
 ```
@@ -35,7 +34,7 @@ bash run_rl_trainer_xxx.sh
 For more details, refer to my WandB report:  
 **[Logic-RL-Lite Training Report](https://wandb.ai/yuwang91-hk/Logic-RL-Lite/reports/Logic-RL-Lite-Lightweight-Replication-of-DeepSeek-R1-Zero--VmlldzoxMTU5ODkzNQ)**
 
-Note the conclusions may only apply to my experimentation setup.
+Note: The findings are specific to this experimentation setup.
 
 ### 1. **Smallest Model Capable of Learning Reasoning**
 - **1.5B Models and Smaller**:
@@ -78,8 +77,8 @@ Note the conclusions may only apply to my experimentation setup.
 - **Left Figure**: Answer accuracy versus token count distribution.  
 - **Right Figure**: Regression analysis of accuracy against token count.  
 
-[Barplot](analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png)  
-[Regression](analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png)
+<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 48%; display: inline-block;">
+<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png" alt="Regression: Accuracy vs Token Count" style="width: 48%; display: inline-block;">
 
 ---
 
