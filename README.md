@@ -1,16 +1,41 @@
 # Logic-RL-Lite: Lightweight Replication of DeepSeek-R1-Zero
 
-**Logic-RL-Lite** is a lightweight replication study of the [DeepSeek-R1-Zero](https://github.com/deepseek-ai/DeepSeek-R1) framework. This project investigates the use of **pure reinforcement learning (RL)** without supervised fine-tuning (SFT) to post-train base models for reasoning capabilities. It follows up on the Logic-RL project.
+**Logic-RL-Lite** is a lightweight replication study of the [DeepSeek-R1-Zero](https://github.com/deepseek-ai/DeepSeek-R1) framework. This project investigates the use of **pure reinforcement learning (RL)** without supervised fine-tuning (SFT) to post-train base models for reasoning capabilities. It is a follow-up of the Logic-RL project.
 
 It leverages the following key components:
 
-1. RL Framework: **veRL**
-2. RL Dataset: **Knights and Knaves (K&K) Logic Puzzle Dataset**
-3. Base Models: **Qwen2.5** (1.5B, 3B), **Llama3.2** (3B)
+1. RL Framework: **[veRL](https://github.com/volcengine/verl)**
+2. RL Algorithms: [**REINFORCE++**](https://arxiv.org/html/2501.03262v1) and [**GRPO**](https://arxiv.org/abs/2402.03300)
+3. RL Dataset: **[Knights and Knaves (K&K) Logic Puzzle Dataset](https://github.com/AlphaPav/mem-kk-logic)**
+4. Base Models: **[Qwen2.5](https://huggingface.co/models?search=Qwen2.5)** (1.5B, 3B), **[Llama3.2](https://huggingface.co/models?search=Llama3.2)** (3B)
+
+---
+
+## Datasets
+
+### Knights and Knaves (K&K) Logic Puzzle
+For this logic puzzle, imagine there are two types of people: **Knights** and **Knaves**.  
+- **Knights** always tell the truth.  
+- **Knaves** always lie.  
+
+The K&K dataset is designed to test logical reasoning capabilities by presenting puzzles involving statements made by multiple "people," where the goal is to determine who is a knight and who is a knave based on the given clues.
+
+---
+
+### Execute the Trainer
+After configuring your WandB, GPUs, and other settings, use the following script:  
+```bash
+bash run_rl_trainer_xxx.sh
+```
 
 ---
 
 ## Key Findings
+
+For more details, refer to my WandB report:  
+**[Logic-RL-Lite Training Report](https://wandb.ai/yuwang91-hk/Logic-RL-Lite/reports/Logic-RL-Lite-Lightweight-Replication-of-DeepSeek-R1-Zero--VmlldzoxMTU5ODkzNQ)**
+
+Note the conclusions may only apply to my experimentation setup.
 
 ### 1. **Smallest Model Capable of Learning Reasoning**
 - **1.5B Models and Smaller**:
@@ -29,11 +54,32 @@ It leverages the following key components:
 - These behaviors likely stem from **instruction tuning**, rather than emergent properties of pure RL.
 - See findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero) and [Logic-RL](https://github.com/Unakar/Logic-RL).
 
+#### Table: Appearance of Self-Reflection Keywords During Training
+| Keyword         | Epoch | Step |
+|------------------|-------|------|
+| rethink          | 0     | 4    |
+| recheck          | 0     | 0    |
+| re-check         | 0     | 14   |
+| double check     | 0     | 1    |
+| double-check     | 0     | 7    |
+| verify           | 0     | 1    |
+| summarize        | 0     | 1    |
+| summary          | 0     | 0    |
+| wait             | 0     | 63   |
+| aha              | N/A   | N/A  |
+
 ---
 
 ### 3. **Longer Chain-of-Thought (CoT) ≠ Higher Accuracy**
 - While CoT becomes longer and the mean rewards increase, longer CoT does not correlate with higher accuracy.
-- See **superficial self-reflection** findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero).
+- This aligns with **superficial self-reflection** findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero).
+
+#### Figures:
+- **Left Figure**: Answer accuracy versus token count distribution.  
+- **Right Figure**: Regression analysis of accuracy against token count.  
+
+[Barplot](analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png)  
+[Regression](analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png)
 
 ---
 
@@ -43,11 +89,17 @@ It leverages the following key components:
 - **Pretrained Models**:
   - Language mixing is prevalent.
 
+#### Table: Language Distribution in Model Outputs
+| Output Type         | Only English | Only Chinese | Mixed (English & Chinese) |
+|----------------------|--------------|--------------|---------------------------|
+| `model_think`        | 98.71%       | 0.00%        | 0.82%                     |
+| `model_answer_raw`   | 99.44%       | 0.00%        | 0.00%                     |
+
 ---
 
 ### 5. **Stability of RL Algorithms**
-- **Reinforce++** appears more stable than **GRPO**.
-- Further experiments are expected.
+- **REINFORCE++** appears more stable than **GRPO**.  
+- Further experiments are expected to confirm this finding.  
 
 ---
 
@@ -60,4 +112,4 @@ This project builds upon and references several open-source works:
 - **[OAT-ZERO](https://github.com/sail-sg/oat-zero)**: Insights on reasoning with pure RL.
 - **[TinyZero](https://github.com/Jiayi-Pan/TinyZero)**: Implementation of reward models and Countdown task.
 - **[DeepScaler](https://github.com/agentica-project/deepscaler)**: Iterative context scaling with GRPO.
-- **[Knights and Knaves (K&K) Puzzle Dataset](https://github.com/AlphaPav/mem-kk-logic)**: Memory-based logic tasks.
+- **[Knights and Knaves (K&K) Puzzle Dataset](https://github.com/AlphaPav/mem-kk-logic)**: Logical reasoning tasks for LLMs.
