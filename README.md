@@ -58,19 +58,33 @@ Note: The findings may be specific to this experimentation setup.
 - These behaviors likely stem from **instruction tuning**, rather than emergent properties of pure RL.
 - See findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero) and [Logic-RL](https://github.com/Unakar/Logic-RL).
 
-#### Table: Appearance of Self-Reflection Keywords During Training (Base Model = Qwen2.5-3B-Instruct)
+#### Table: Appearance of Self-Reflection and Verification Keywords During Training (Base Model = Qwen2.5-3B-Instruct)
+
 | Keyword         | Epoch | Step |
 |------------------|-------|------|
 | rethink          | 0     | 4    |
+| re-think         | N/A   | N/A  |
+| think again      | N/A   | N/A  |
+| retry            | N/A   | N/A  |
+| re-try           | N/A   | N/A  |
+| try again        | N/A   | N/A  |
 | recheck          | 0     | 0    |
 | re-check         | 0     | 14   |
+| check again      | 0     | 52   |
+| reevaluate       | 0     | 121  |
+| re-evaluate      | 0     | 0    |
 | double check     | 0     | 1    |
 | double-check     | 0     | 7    |
 | verify           | 0     | 1    |
+| aha              | N/A   | N/A  |
+| wait             | 0     | 63   |
+
+#### Table: Appearance of Summarization Keywords During Training (Base Model = Qwen2.5-3B-Instruct)
+
+| Keyword         | Epoch | Step |
+|------------------|-------|------|
 | summarize        | 0     | 1    |
 | summary          | 0     | 0    |
-| wait             | 0     | 63   |
-| aha              | N/A   | N/A  |
 
 ---
 
