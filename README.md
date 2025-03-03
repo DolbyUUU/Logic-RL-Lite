@@ -7,17 +7,22 @@ It leverages the following key components:
 1. RL Framework: **[veRL](https://github.com/volcengine/verl)**
 2. RL Algorithms: [**REINFORCE++**](https://arxiv.org/html/2501.03262v1) and [**GRPO**](https://arxiv.org/abs/2402.03300)
 3. RL Dataset: **[Knights and Knaves (K&K) Logic Puzzle Dataset](https://github.com/AlphaPav/mem-kk-logic)**
-4. Base Models: **[Qwen2.5](https://huggingface.co/models?search=Qwen2.5)** (1.5B, 3B), **[Llama3.2](https://huggingface.co/models?search=Llama3.2)** (3B)
+4. Base Models: Qwen2.5 (1.5B, 3B), Llama3.2 (3B)
 
 ---
 
 ## Dataset
 
-Knights and Knaves (K&K) Logic Puzzle: Imagine there are two types of people: **Knights** and **Knaves**.  
-- **Knights** always tell the truth.  
-- **Knaves** always lie.  
+Knights and Knaves (K&K) Logic Puzzle: Imagine there are two types of people: **Knights** and **Knaves**. Knights always tell the truth. Knaves always lie.  
 
 The K&K dataset is designed to test logical reasoning capabilities by presenting puzzles involving statements made by multiple "people," where the goal is to determine who is a knight and who is a knave based on the given clues.
+
+---
+
+## RL Reward Design
+1. Format Reward: Yes
+2. Correctness Reward: Yes
+3. Language Consistency Reward or Others: No
 
 ---
 
@@ -31,10 +36,10 @@ bash run_rl_trainer_xxx.sh
 
 ## Key Findings
 
-For more details, refer to my WandB report:  
+For more visualized details, refer to my WandB report:  
 **[Logic-RL-Lite Training Report](https://wandb.ai/yuwang91-hk/Logic-RL-Lite/reports/Logic-RL-Lite-Lightweight-Replication-of-DeepSeek-R1-Zero--VmlldzoxMTU5ODkzNQ)**
 
-Note: The findings are specific to this experimentation setup.
+Note: The findings may be specific to this experimentation setup.
 
 ### 1. **Smallest Model Capable of Learning Reasoning**
 - **1.5B Models and Smaller**:
@@ -42,7 +47,7 @@ Note: The findings are specific to this experimentation setup.
 - **3B Models**:
   - **Instruction-tuned models** (e.g., Qwen2.5-3B) can learn reasoning.
   - **Pretrained models** (e.g., Llama3.2-3B) struggle to learn reasoning.
-  - Hypothesis: **Qwen2.5-3B-Pretrain** is likely somewhat instruction-tuned, making it significantly more capable than Llama3.2-3B-Pretrain.
+  - Hypothesis: **Qwen2.5-3B-Pretrain** is likely somewhat instruction-tuned, making it significantly "smarter" than Llama3.2-3B-Pretrain.
 - **7B Models and Larger**:
   - Consistently learn reasoning.
 
@@ -53,7 +58,7 @@ Note: The findings are specific to this experimentation setup.
 - These behaviors likely stem from **instruction tuning**, rather than emergent properties of pure RL.
 - See findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero) and [Logic-RL](https://github.com/Unakar/Logic-RL).
 
-#### Table: Appearance of Self-Reflection Keywords During Training
+#### Table: Appearance of Self-Reflection Keywords During Training (Base Model = Qwen2.5-3B-Instruct)
 | Keyword         | Epoch | Step |
 |------------------|-------|------|
 | rethink          | 0     | 4    |
@@ -73,22 +78,27 @@ Note: The findings are specific to this experimentation setup.
 - While CoT becomes longer and the mean rewards increase, longer CoT does not correlate with higher accuracy.
 - This aligns with **superficial self-reflection** findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero).
 
-#### Figures:
+#### Figures (Base Model = Qwen2.5-3B-Instruct):
 - **Left Figure**: Answer accuracy versus token count distribution.  
 - **Right Figure**: Regression analysis of accuracy against token count.  
 
-<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 48%; display: inline-block;">
-<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png" alt="Regression: Accuracy vs Token Count" style="width: 48%; display: inline-block;">
+<div style="display: flex; justify-content: space-between;">
+
+<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 48%;">
+
+<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png" alt="Regression: Accuracy vs Token Count" style="width: 48%;">
+
+</div>
 
 ---
 
 ### 4. **Language Mixing**
-- **Instruction-Tuned Models**:
+- **Instruction-Tuned Model as Base Model**:
   - Rare occurrences of language mixing.
-- **Pretrained Models**:
-  - Language mixing is prevalent.
+- **Pretrained Model as Base Model**:
+  - Language mixing is more prevalent.
 
-#### Table: Language Distribution in Model Outputs
+#### Table: Language Distribution in Model Outputs (Base Model = Qwen2.5-3B-Instruct)
 | Output Type         | Only English | Only Chinese | Mixed (English & Chinese) |
 |----------------------|--------------|--------------|---------------------------|
 | `model_think`        | 98.71%       | 0.00%        | 0.82%                     |
