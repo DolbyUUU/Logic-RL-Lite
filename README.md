@@ -21,7 +21,7 @@ The K&K dataset is designed to test logical reasoning capabilities by presenting
 
 ## RL Reward Design
 1. Format Reward: Yes
-2. Correctness Reward: Yes
+2. Answer Reward: Yes
 3. Language Consistency Reward or Others: No
 
 ---
@@ -98,9 +98,9 @@ Note: The findings may be specific to this experimentation setup.
 
 <div style="display: flex; justify-content: space-between;">
 
-<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 48%;">
+<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 70%;">
 
-<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png" alt="Regression: Accuracy vs Token Count" style="width: 48%;">
+<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png" alt="Regression: Accuracy vs Token Count" style="width: 70%;">
 
 </div>
 
