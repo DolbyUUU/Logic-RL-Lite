@@ -7,21 +7,21 @@ It leverages the following key components:
 1. RL Framework: **[veRL](https://github.com/volcengine/verl)**
 2. RL Algorithms: [**REINFORCE++**](https://arxiv.org/html/2501.03262v1) and [**GRPO**](https://arxiv.org/abs/2402.03300)
 3. RL Dataset: **[Knights and Knaves (K&K) Logic Puzzle Dataset](https://github.com/AlphaPav/mem-kk-logic)**
-4. Base Models: Qwen2.5 (1.5B, 3B), Llama3.2 (3B)
+4. Base Models: Qwen2.5 (3B), Llama3.2 (3B)
 
 ---
 
 ## Dataset
 
-Knights and Knaves (K&K) Logic Puzzle: Imagine there are two types of people: **Knights** and **Knaves**. Knights always tell the truth. Knaves always lie.  
+**Knights and Knaves (K&K) Logic Puzzle**: Imagine there are two types of people: **Knights** and **Knaves**. Knights always tell the truth. Knaves always lie.  
 
 The K&K dataset is designed to test logical reasoning capabilities by presenting puzzles involving statements made by multiple "people," where the goal is to determine who is a knight and who is a knave based on the given clues.
 
 ---
 
-## RL Reward Design
-1. Format Reward: Yes
-2. Answer Reward: Yes
+## Rule-Based Rewards
+1. **Format Reward**: Yes
+2. **Answer Reward**: Yes
 3. Language Consistency Reward or Others: No
 
 ---
@@ -37,9 +37,9 @@ bash run_rl_trainer_xxx.sh
 ## Key Findings
 
 For more visualized details, refer to my WandB report:  
-**[Logic-RL-Lite Training Report](https://wandb.ai/yuwang91-hk/Logic-RL-Lite/reports/Logic-RL-Lite-Lightweight-Replication-of-DeepSeek-R1-Zero--VmlldzoxMTU5ODkzNQ)**
+**[Logic-RL-Lite Training Report](https://api.wandb.ai/links/yuwang91-hk/xevkhi9d)**
 
-Note: The findings may be specific to this experimentation setup.
+Note: The findings may be specific to the experiment setups.
 
 ### 1. **Smallest Model Capable of Learning Reasoning**
 - **1.5B Models and Smaller**:
@@ -54,8 +54,8 @@ Note: The findings may be specific to this experimentation setup.
 
 ### 2. **Base Model Selection Matters**
 - Cognitive differences between **Qwen2.5-3B** and **Llama3.2-3B** are discussed in [this paper](https://arxiv.org/abs/2503.01307).  
-- Qwen2.5-3B demonstrates stronger instruction-following behavior compared to Llama3.2-3B.  
-- Hypothesis: Qwen2.5-3B may have undergone partial instruction tuning.
+- Qwen2.5-3B demonstrates stronger instruction-following behavior compared to Llama3.2-3B. 
+- Llama3.2-3B suffers from repetition.
 
 ---
 
@@ -64,37 +64,61 @@ Note: The findings may be specific to this experimentation setup.
 - These behaviors likely stem from **instruction tuning**, rather than emergent properties of pure RL.
 - See findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero) and [Logic-RL](https://github.com/Unakar/Logic-RL).
 
-#### Table: Appearance of Self-Reflection and Verification Keywords During Training (Base Model = Qwen2.5-3B-Instruct)
+#### Table: Appearance of Self-Reflection, Verification and Summarization Keywords During Training (Base Model = Qwen2.5-3B-Instruct)
 
-| Keyword         | Epoch | Step |
-|------------------|-------|------|
-| rethink          | 0     | 4    |
-| re-think         | N/A   | N/A  |
-| think again      | N/A   | N/A  |
-| retry            | N/A   | N/A  |
-| re-try           | N/A   | N/A  |
-| try again        | N/A   | N/A  |
-| recheck          | 0     | 0    |
-| re-check         | 0     | 14   |
-| check again      | 0     | 52   |
-| reevaluate       | 0     | 121  |
-| re-evaluate      | 0     | 0    |
-| double check     | 0     | 1    |
-| double-check     | 0     | 7    |
-| verify           | 0     | 1    |
-| aha              | N/A   | N/A  |
-| wait             | 0     | 63   |
+| Word           | First Occurrence (epoch, step) | Instances Found | Percentage (%) |
+|----------------|--------------------------------|----------------|----------------|
+| rethink        | N/A                            | 0              |           0.00 |
+| re-think       | N/A                            | 0              |           0.00 |
+| think again    | N/A                            | 0              |           0.00 |
+| retry          | N/A                            | 0              |           0.00 |
+| re-try         | N/A                            | 0              |           0.00 |
+| try again      | N/A                            | 0              |           0.00 |
+| recheck        | (0, 1)                         | 9              |           0.04 |
+| re-check       | N/A                            | 0              |           0.00 |
+| check again    | (0, 1)                         | 3              |           0.01 |
+| reevaluate     | (0, 5)                         | 3              |           0.01 |
+| re-evaluate    | (0, 4)                         | 34             |           0.15 |
+| double check   | N/A                            | 0              |           0.00 |
+| double-check   | N/A                            | 0              |           0.00 |
+| verify         | (0, 0)                         | 83             |           0.37 |
+| summarize      | (0, 0)                         | 73             |           0.33 |
+| summary        | (0, 1)                         | 251            |           1.13 |
+| aha            | N/A                            | 0              |           0.00 |
+| wait           | N/A                            | 0              |           0.00 |
 
-#### Table: Appearance of Summarization Keywords During Training (Base Model = Qwen2.5-3B-Instruct)
+#### Table: Appearance of Self-Reflection, Verification and Summarization Keywords During Training (Base Model = Qwen2.5-3B)
 
-| Keyword         | Epoch | Step |
-|------------------|-------|------|
-| summarize        | 0     | 1    |
-| summary          | 0     | 0    |
+| Word           | First Occurrence (epoch, step) | Instances Found | Percentage (%) |
+|----------------|--------------------------------|----------------|----------------|
+| rethink        | N/A                            | 0              |           0.00 |
+| re-think       | N/A                            | 0              |           0.00 |
+| think again    | N/A                            | 0              |           0.00 |
+| retry          | N/A                            | 0              |           0.00 |
+| re-try         | N/A                            | 0              |           0.00 |
+| try again      | N/A                            | 0              |           0.00 |
+| recheck        | N/A                            | 0              |           0.00 |
+| re-check       | N/A                            | 0              |           0.00 |
+| check again    | N/A                            | 0              |           0.00 |
+| reevaluate     | N/A                            | 0              |           0.00 |
+| re-evaluate    | (0, 6)                         | 1              |           0.00 |
+| double check   | N/A                            | 0              |           0.00 |
+| double-check   | N/A                            | 0              |           0.00 |
+| verify         | N/A                            | 0              |           0.00 |
+| summarize      | N/A                            | 0              |           0.00 |
+| summary        | (0, 11)                        | 1              |           0.00 |
+| aha            | N/A                            | 0              |           0.00 |
+| wait           | N/A                            | 0              |           0.00 |
 
 ---
 
-### 4. **Longer Chain-of-Thought (CoT) ≠ Higher Accuracy**
+### 4. **Longer Chain-of-Thought (CoT) is Not Always Present**
+- **Longer CoT** does not consistently appear across different experiments.
+- Longer CoT likely emerges only when the task is challenging, as the model may resort to memorization rather than true reasoning.
+- Further experiments are required to validate this observation.  
+
+
+### 5. **Longer Chain-of-Thought (CoT) ≠ Higher Accuracy**
 - While CoT becomes longer and the mean rewards increase, longer CoT does not correlate with higher accuracy.
 - This aligns with **superficial self-reflection** findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero).
 
@@ -104,29 +128,35 @@ Note: The findings may be specific to this experimentation setup.
 
 <div style="display: flex; justify-content: space-between; gap: 1px;">
 
-<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 48%;">
+<img src="analysis/Qwen2.5-3B/plots/barplot_answer_vs_tokens_20250311_113523.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 48%;">
 
-<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png" alt="Regression: Accuracy vs Token Count" style="width: 48%;">
+<img src="analysis/Qwen2.5-3B/plots/regression_answer_vs_tokens_20250311_113523.png" alt="Regression: Accuracy vs Token Count" style="width: 48%;">
 
 </div>
 
 ---
 
-### 5. **Language Mixing**
-- **Instruction-Tuned Model as Base Model**:
-  - Rare occurrences of language mixing.
-- **Pretrained Model as Base Model**:
-  - Language mixing is more prevalent.
+### 6. **Language Mixing in Instruction-Tuned Models**
+- **Within `<think></think>` tags**: Language mixing is more prevalent when the base model is instruction-tuned. This finding is **counter-intuitive**.  
+- **Outside `<think></think>` or `<answer></answer>` tags**: Language mixing is more prevalent when the base model is only pre-trained.
 
-#### Table: Language Distribution in Model Outputs (Base Model = Qwen2.5-3B-Instruct)
-| Output Type         | Only English | Only Chinese | Mixed (English & Chinese) |
-|----------------------|--------------|--------------|---------------------------|
-| `model_think`        | 98.71%       | 0.00%        | 0.82%                     |
-| `model_answer_raw`   | 99.44%       | 0.00%        | 0.00%                     |
+#### Table: Language Distribution in Model Thinking (Base Model = Qwen2.5-3B-Instruct)
+| Category               | Count | Percentage |
+|------------------------|-------|------------|
+| Only English           | 21636 | 96.73% |
+| Only Chinese           | 0 | 0.00% |
+| Mixed (English & Chinese) | 511 | 2.28% |
+
+#### Table: Language Distribution in Model Thinking (Base Model = Qwen2.5-3B)
+| Category               | Count | Percentage |
+|------------------------|-------|------------|
+| Only English           | 21888 | 97.85% |
+| Only Chinese           | 0 | 0.00% |
+| Mixed (English & Chinese) | 0 | 0.00% |
 
 ---
 
-### 6. **RL Algorithm Stability**
+### 7. **REINFORCE++ Demonstrates Stability**
 - **REINFORCE++** demonstrates greater stability compared to **GRPO** during training.  
 - Further experiments are required to validate this observation.  
 - For a technical comparison of **REINFORCE++**, **GRPO**, and **PPO**, see [this report](https://hijkzzz.notion.site/reinforce-plus-plus).
