@@ -1,14 +1,15 @@
 import json
 import re
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 
 # File path
 PARSED_LOG_FILE = "parsed_logs.json"
 
-def find_word_occurrences(parsed_data: List[Dict], direct_words: List[str], regex_words: List[str]) -> Dict[str, Optional[Dict[str, int]]]:
+def find_word_occurrences(parsed_data: List[Dict], direct_words: List[str], regex_words: List[str]) -> Tuple[Dict[str, Optional[Dict[str, int]]], Dict[str, int]]:
     """
     Check the first occurrence of specified words in "model_think" and record the epoch and step.
+    Also calculate statistical data for each word.
 
     Args:
         parsed_data: A list of parsed log data.
@@ -16,27 +17,36 @@ def find_word_occurrences(parsed_data: List[Dict], direct_words: List[str], rege
         regex_words: A list of words for regex matching.
 
     Returns:
-        A dictionary where the keys are the words and the values are dictionaries containing the first occurrence's epoch and step.
-        If the word does not occur, the value is None.
+        A tuple with:
+            - Word occurrences (first epoch and step).
+            - Overall statistics of how often each word appears.
     """
     word_occurrences = {word: None for word in direct_words + regex_words}  # Initialize the result dictionary
+    word_stats = {word: 0 for word in direct_words + regex_words}  # Count occurrences for each word
 
     for entry in parsed_data:
-        epoch = entry.get("epoch")
-        step = entry.get("step")
-        model_think = entry.get("model_think", "").lower()  # Convert to lowercase for case-insensitive matching
+        # Safely retrieve and normalize the "model_think" field
+        model_think = entry.get("model_think", "")
+        if not isinstance(model_think, str):
+            model_think = ""  # Default to empty string if not a valid string
+
+        model_think = model_think.lower()  # Convert to lowercase for case-insensitive matching
 
         # Handle direct matching words
         for word in direct_words:
-            if word_occurrences[word] is None and word.lower() in model_think:
-                word_occurrences[word] = {"epoch": epoch, "step": step}
+            if word.lower() in model_think:
+                word_stats[word] += 1  # Increment count
+                if word_occurrences[word] is None:  # Record first occurrence
+                    word_occurrences[word] = {"epoch": entry.get("epoch"), "step": entry.get("step")}
 
         # Handle regex matching words
         for word in regex_words:
-            if word_occurrences[word] is None and re.search(rf'\b{word}\b', model_think, flags=re.IGNORECASE):
-                word_occurrences[word] = {"epoch": epoch, "step": step}
+            if re.search(rf'\b{word}\b', model_think, flags=re.IGNORECASE):
+                word_stats[word] += 1  # Increment count
+                if word_occurrences[word] is None:  # Record first occurrence
+                    word_occurrences[word] = {"epoch": entry.get("epoch"), "step": entry.get("step")}
 
-    return word_occurrences
+    return word_occurrences, word_stats
 
 def load_parsed_logs(file_path: str) -> List[Dict]:
     """
@@ -83,8 +93,13 @@ def main():
         print("Failed to load parsed log data.")
         return
 
-    # Find the first occurrence of words in terms of epoch and step
-    occurrences = find_word_occurrences(parsed_logs, direct_words, regex_words)
+    # Find the first occurrence of words and their statistics
+    occurrences, stats = find_word_occurrences(parsed_logs, direct_words, regex_words)
+
+    # Total number of valid instances
+    total_instances = len(parsed_logs)
+    invalid_instances = sum(1 for entry in parsed_logs if entry.get("model_think") is None or entry.get("model_answer") is None)
+    valid_instances = total_instances - invalid_instances
 
     # Get the current timestamp and generate a file name
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -92,12 +107,19 @@ def main():
 
     # Write the results to the file
     with open(output_file, "w", encoding="utf-8") as f:
+        # Write summary
+        f.write(f"# Analysis Summary\n\n")
+        f.write(f"- Total instances: {total_instances}\n")
+        f.write(f"- Total valid instances: {valid_instances}\n")
+        f.write(f"- Total invalid instances: {invalid_instances}\n\n")
+        f.write(f"| Word           | First Occurrence (epoch, step) | Instances Found | Percentage (%) |\n")
+        f.write(f"|----------------|--------------------------------|----------------|----------------|\n")
+        
         for word, location in occurrences.items():
-            if location:
-                result = f"The word '{word}' first appeared at epoch {location['epoch']}, step {location['step']}.\n"
-            else:
-                result = f"The word '{word}' did not appear in the logs.\n"
-            f.write(result)
+            instances_found = stats[word]
+            percentage = (instances_found / valid_instances) * 100 if valid_instances > 0 else 0
+            first_occurrence = f"({location['epoch']}, {location['step']})" if location else "N/A"
+            f.write(f"| {word:<14} | {first_occurrence:<30} | {instances_found:<14} | {percentage:>14.2f} |\n")
 
     print(f"Analysis results have been saved to the file: {output_file}")
 

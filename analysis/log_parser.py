@@ -1,21 +1,14 @@
+import argparse
 import re
 import json
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, List
 
-# 文件路径
-LOG_FILE = "./wandb/latest-run/files/output.log"
+# Default output file
 OUTPUT_FILE = "parsed_logs.json"
 
 def extract_solution(solution_str: str) -> Tuple[Optional[str], str]:
-    """从模型响应中提取最终答案。
-    
-    Args:
-        solution_str: 模型的原始响应字符串。
-        
-    Returns:
-        包含 (提取的答案, 处理后的字符串) 的元组。
-    """
+    """Extract the final answer from the model's response."""
     if "Assistant:" in solution_str:
         processed_str = solution_str.split("Assistant:", 1)[1]
     elif "<|im_start|>assistant" in solution_str:
@@ -23,7 +16,6 @@ def extract_solution(solution_str: str) -> Tuple[Optional[str], str]:
     else:
         return None, solution_str
 
-    # 提取 <answer> 部分
     answer_pattern = r'<answer>(.*?)</answer>'
     matches = list(re.finditer(answer_pattern, processed_str, re.DOTALL))
     if not matches:
@@ -32,42 +24,17 @@ def extract_solution(solution_str: str) -> Tuple[Optional[str], str]:
     final_answer = matches[-1].group(1).strip()
     return final_answer, processed_str
 
-def validate_response_structure(processed_str: str) -> bool:
-    """验证模型响应的结构是否正确。"""
-    validation_passed = True
-    tags = {
-        'think_start': ('<think>', 1),
-        'think_end': ('</think>', 1),
-        'answer_start': ('<answer>', 1),
-        'answer_end': ('</answer>', 1)
-    }
-    positions = {}
-    for tag_name, (tag_str, expected_count) in tags.items():
-        count = processed_str.count(tag_str)
-        positions[tag_name] = pos = processed_str.find(tag_str)
-        if count != expected_count:
-            validation_passed = False
-    if positions['think_start'] > positions['think_end'] or \
-       positions['think_end'] > positions['answer_start'] or \
-       positions['answer_start'] > positions['answer_end']:
-        validation_passed = False
-    return validation_passed
-
 def parse_solution_text_format(solution_text: str) -> Dict[str, str]:
-    """解析 Ground Truth 部分，返回角色及其状态的字典。"""
+    """Parse the Ground Truth section and return a dictionary of roles and their statuses."""
     status_dict = {}
-    for line in solution_text.split('\n'):
-        line = line.strip()
-        if not line:
-            continue
-        match = re.search(r'\b([A-Za-z]+)\b.*?\b(knight|knave)\b', line, re.IGNORECASE)
-        if match:
-            name, role = match.groups()
-            status_dict[name] = role.lower()
+    pattern = re.compile(r'Found:\s*([\w\s]+)\s*→\s*(knight|knave)', re.IGNORECASE)
+    for match in pattern.finditer(solution_text):
+        name, role = match.groups()
+        status_dict[name.strip()] = role.strip().lower()
     return status_dict
 
-def parse_model_answer(answer_text: str, expected_names: list) -> Optional[Dict[str, str]]:
-    """解析模型答案，返回角色及其状态的字典。"""
+def parse_model_answer(answer_text: str, expected_names: List[str]) -> Optional[Dict[str, str]]:
+    """Parse the model's answer and return a dictionary of roles and their statuses."""
     status_dict = {}
     for name in expected_names:
         pattern = re.compile(
@@ -83,27 +50,27 @@ def parse_model_answer(answer_text: str, expected_names: list) -> Optional[Dict[
     return status_dict
 
 def parse_epoch_and_step(log_content: str) -> Tuple[Optional[int], Optional[int]]:
-    """解析日志内容中的 epoch 和 step 信息。
-    
-    Args:
-        log_content: 日志内容。
-    
-    Returns:
-        包含 (epoch, step) 的元组。
-    """
+    """Parse epoch and step information from the log content."""
     epoch_pattern = re.compile(r"epoch\s+(\d+)", re.IGNORECASE)
     step_pattern = re.compile(r"step\s+(\d+)", re.IGNORECASE)
     
     epoch_match = epoch_pattern.search(log_content)
     step_match = step_pattern.search(log_content)
-    
+
     epoch = int(epoch_match.group(1)) if epoch_match else None
     step = int(step_match.group(1)) if step_match else None
     
     return epoch, step
 
-def parse_log(log_content: str):
-    """解析日志内容并提取结构化数据。"""
+def parse_log(log_content: str) -> Tuple[List[Dict], int, int]:
+    """
+    Parse the log content and extract structured data.
+    
+    Returns:
+        parsed_data: A list of parsed log entries.
+        total_instances: Total number of instances in the log.
+        invalid_instances: Number of invalid instances in the log.
+    """
     sample_pattern = re.compile(r"=+\n=+ Processing New Sample =+\n")
     ground_truth_pattern = re.compile(r"\[Ground Truth Parsing\](.*?)\[Ground Truth\] Final identities: (.*?)\n", re.S)
     model_response_pattern = re.compile(r"\[Model Response\]\n\n<think>(.*?)</think>\n<answer>(.*?)</answer>", re.S)
@@ -111,6 +78,9 @@ def parse_log(log_content: str):
 
     samples = sample_pattern.split(log_content)
     parsed_data = []
+
+    # Track invalid instances
+    invalid_instances = 0
 
     # Track the last seen epoch and step
     current_epoch = None
@@ -126,7 +96,7 @@ def parse_log(log_content: str):
         if step is not None:
             current_step = step
 
-        # 如果 current_epoch 或 current_step 为 None，初始化为 0
+        # Initialize epoch and step to 0 if they are still None
         if current_epoch is None:
             current_epoch = 0
         if current_step is None:
@@ -136,22 +106,28 @@ def parse_log(log_content: str):
         parsed_sample["epoch"] = current_epoch
         parsed_sample["step"] = current_step
 
-        # 提取 Ground Truth
+        # Extract Ground Truth
         ground_truth_match = ground_truth_pattern.search(sample)
         if ground_truth_match:
             raw_gt = ground_truth_match.group(1).strip()
             parsed_sample["ground_truth"] = parse_solution_text_format(raw_gt)
+        else:
+            parsed_sample["ground_truth"] = None  # Default when ground truth is missing
 
-        # 提取模型响应
+        # Extract Model Response
         model_response_match = model_response_pattern.search(sample)
         if model_response_match:
             parsed_sample["model_think"] = model_response_match.group(1).strip()
-            parsed_sample["model_answer_raw"] = model_response_match.group(2).strip()
+            parsed_sample["model_answer"] = model_response_match.group(2).strip()
+        else:
+            parsed_sample["model_think"] = None  # Default for missing <think> tag
+            parsed_sample["model_answer"] = None  # Default for missing <answer> tag
 
-            # 验证响应结构
-            parsed_sample["structure_valid"] = validate_response_structure(model_response_match.group(1))
+        # Check if the instance is invalid
+        if parsed_sample["model_think"] is None or parsed_sample["model_answer"] is None:
+            invalid_instances += 1
 
-        # 提取最终分数
+        # Extract Final Score
         final_score_match = final_score_pattern.search(sample)
         if final_score_match:
             parsed_sample["final_score"] = {
@@ -159,28 +135,47 @@ def parse_log(log_content: str):
                 "answer": float(final_score_match.group(2).strip()),
                 "total": float(final_score_match.group(3).strip())
             }
+        else:
+            parsed_sample["final_score"] = None  # Default when final score is missing
 
         parsed_data.append(parsed_sample)
 
-    return parsed_data
+    total_instances = len(parsed_data)
+    return parsed_data, total_instances, invalid_instances
 
 def save_to_json(data, output_file):
-    """保存解析结果为 JSON 文件。"""
+    """Save the parsed results to a JSON file."""
     with open(output_file, "w") as f:
         json.dump(data, f, indent=4)
 
 def main():
-    log_path = Path(LOG_FILE)
+    # Use argparse to parse command-line arguments
+    parser = argparse.ArgumentParser(description="Parse log files and generate a JSON file.")
+    parser.add_argument("log_file", help="Path to the log file.")
+    parser.add_argument("-o", "--output", default=OUTPUT_FILE, help="Path to the output JSON file.")
+    args = parser.parse_args()
+
+    log_path = Path(args.log_file)
     if not log_path.exists():
-        print(f"日志文件 {LOG_FILE} 不存在！")
+        print(f"Log file {args.log_file} does not exist!")
         return
 
     with open(log_path, "r") as f:
         log_content = f.read()
 
-    parsed_data = parse_log(log_content)
-    save_to_json(parsed_data, OUTPUT_FILE)
-    print(f"解析完成！结果已保存到 {OUTPUT_FILE}")
+    # Parse the log content
+    parsed_data, total_instances, invalid_instances = parse_log(log_content)
+    valid_instances = total_instances - invalid_instances
+
+    # Save to JSON
+    save_to_json(parsed_data, args.output)
+    print(f"Parsing completed! Results saved to {args.output}")
+
+    # Print statistics
+    print(f"\nStatistics:")
+    print(f"- Total instances: {total_instances}")
+    print(f"- Invalid instances: {invalid_instances}")
+    print(f"- Valid instances: {valid_instances}")
 
 if __name__ == "__main__":
     main()

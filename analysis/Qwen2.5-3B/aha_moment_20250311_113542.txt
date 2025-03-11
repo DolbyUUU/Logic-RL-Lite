@@ -1,0 +1,26 @@
+# Analysis Summary
+
+- Total instances: 22368
+- Total valid instances: 21888
+- Total invalid instances: 480
+
+| Word           | First Occurrence (epoch, step) | Instances Found | Percentage (%) |
+|----------------|--------------------------------|----------------|----------------|
+| rethink        | N/A                            | 0              |           0.00 |
+| re-think       | N/A                            | 0              |           0.00 |
+| think again    | N/A                            | 0              |           0.00 |
+| retry          | N/A                            | 0              |           0.00 |
+| re-try         | N/A                            | 0              |           0.00 |
+| try again      | N/A                            | 0              |           0.00 |
+| recheck        | N/A                            | 0              |           0.00 |
+| re-check       | N/A                            | 0              |           0.00 |
+| check again    | N/A                            | 0              |           0.00 |
+| reevaluate     | N/A                            | 0              |           0.00 |
+| re-evaluate    | (0, 6)                         | 1              |           0.00 |
+| double check   | N/A                            | 0              |           0.00 |
+| double-check   | N/A                            | 0              |           0.00 |
+| verify         | N/A                            | 0              |           0.00 |
+| summarize      | N/A                            | 0              |           0.00 |
+| summary        | (0, 11)                        | 1              |           0.00 |
+| aha            | N/A                            | 0              |           0.00 |
+| wait           | N/A                            | 0              |           0.00 |

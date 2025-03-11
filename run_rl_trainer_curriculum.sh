@@ -16,7 +16,7 @@ export WANDB_BASE_URL=https://api.wandb.ai
 
 # Default parameters
 BASE_MODEL="Qwen/Qwen2.5-3B-Instruct"
-EXPERIMENT_NAME="QWEN3B-REINFORCE++-KKLOGIC-CURRICULUM-4RTX4090-$(date +%Y%m%d%H%M)"
+EXPERIMENT_NAME="Qwen3BInstruct-KKlogic345ppl-REINFORCE++-4RTX4090-$(date +%Y%m%d%H%M)"
 PROJECT_NAME="Logic-RL-Lite"
 N_GPUS=4
 ROLLOUT_TP_SIZE=2
@@ -65,6 +65,8 @@ for ppl in $PPL_VALUES; do
         actor_rollout_ref.rollout.name=vllm \
         actor_rollout_ref.rollout.gpu_memory_utilization=0.4 \
         actor_rollout_ref.rollout.n=8 \
+        actor_rollout_ref.rollout.temperature=0.7 \
+        +actor_rollout_ref.rollout.val_temperature=0.7 \
         actor_rollout_ref.ref.log_prob_micro_batch_size=8 \
         actor_rollout_ref.ref.fsdp_config.param_offload=True \
         algorithm.kl_ctrl.kl_coef=0.001 \
@@ -74,8 +76,8 @@ for ppl in $PPL_VALUES; do
         trainer.experiment_name=${CURRENT_EXPERIMENT_NAME} \
         trainer.n_gpus_per_node=${N_GPUS} \
         trainer.nnodes=1 \
-        trainer.save_freq=100 \
-        trainer.test_freq=100 \
+        trainer.save_freq=200 \
+        trainer.test_freq=200 \
         trainer.default_hdfs_dir=./saved_models \
         trainer.total_epochs=5 \
         +trainer.val_before_train=True"

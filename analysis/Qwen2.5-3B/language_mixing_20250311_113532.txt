@@ -1,0 +1,25 @@
+## Language Distribution in `model_think`
+
+| Category               | Count | Percentage |
+|------------------------|-------|------------|
+| Only English           | 21888 | 97.85% |
+| Only Chinese           | 0 | 0.00% |
+| Mixed (English & Chinese) | 0 | 0.00% |
+
+## Language Distribution in `model_answer`
+
+| Category               | Count | Percentage |
+|------------------------|-------|------------|
+| Only English           | 21885 | 97.84% |
+| Only Chinese           | 0 | 0.00% |
+| Mixed (English & Chinese) | 0 | 0.00% |
+
+## Mixed Texts in `model_think`
+
+| Index | Text |
+|-------|------|
+
+## Mixed Texts in `model_answer`
+
+| Index | Text |
+|-------|------|

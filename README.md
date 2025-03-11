@@ -1,4 +1,4 @@
-# Logic-RL-Lite: Lightweight Replication of DeepSeek-R1-Zero
+# Logic-RL-Lite: Lightweight Replication of DeepSeek-R1-Zero and Result Analysis
 
 **Logic-RL-Lite** is a lightweight replication study of the [DeepSeek-R1-Zero](https://github.com/deepseek-ai/DeepSeek-R1) framework. This project investigates the use of **pure reinforcement learning (RL)** without supervised fine-tuning (SFT) to post-train base models for reasoning capabilities. It is a follow-up of the Logic-RL project.
 
@@ -47,13 +47,19 @@ Note: The findings may be specific to this experimentation setup.
 - **3B Models**:
   - **Instruction-tuned models** (e.g., Qwen2.5-3B) can learn reasoning.
   - **Pretrained models** (e.g., Llama3.2-3B) struggle to learn reasoning.
-  - Hypothesis: **Qwen2.5-3B-Pretrain** is likely somewhat instruction-tuned, making it significantly "smarter" than Llama3.2-3B-Pretrain.
 - **7B Models and Larger**:
   - Consistently learn reasoning.
 
 ---
 
-### 2. **No "Aha Moment" During Pure RL**
+### 2. **Base Model Selection Matters**
+- Cognitive differences between **Qwen2.5-3B** and **Llama3.2-3B** are discussed in [this paper](https://arxiv.org/abs/2503.01307).  
+- Qwen2.5-3B demonstrates stronger instruction-following behavior compared to Llama3.2-3B.  
+- Hypothesis: Qwen2.5-3B may have undergone partial instruction tuning.
+
+---
+
+### 3. **No "Aha Moment" During Pure RL**
 - Self-reflection and rethinking behaviors **appear at epoch 0** (or even step 0) in **instruction-tuned base models**.
 - These behaviors likely stem from **instruction tuning**, rather than emergent properties of pure RL.
 - See findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero) and [Logic-RL](https://github.com/Unakar/Logic-RL).
@@ -88,7 +94,7 @@ Note: The findings may be specific to this experimentation setup.
 
 ---
 
-### 3. **Longer Chain-of-Thought (CoT) ≠ Higher Accuracy**
+### 4. **Longer Chain-of-Thought (CoT) ≠ Higher Accuracy**
 - While CoT becomes longer and the mean rewards increase, longer CoT does not correlate with higher accuracy.
 - This aligns with **superficial self-reflection** findings from [OAT-ZERO](https://github.com/sail-sg/oat-zero).
 
@@ -96,17 +102,17 @@ Note: The findings may be specific to this experimentation setup.
 - **Left Figure**: Answer accuracy versus token count distribution.  
 - **Right Figure**: Regression analysis of accuracy against token count.  
 
-<div style="display: flex; justify-content: space-between;">
+<div style="display: flex; justify-content: space-between; gap: 1px;">
 
-<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 70%;">
+<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/barplot_answer_vs_tokens_20250302_180806.png" alt="Barplot: Answer Accuracy vs Token Count" style="width: 48%;">
 
-<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png" alt="Regression: Accuracy vs Token Count" style="width: 70%;">
+<img src="analysis/QWEN3B-INSTRUCT-KKLOGIC-3/plots/regression_answer_vs_tokens_20250302_180806.png" alt="Regression: Accuracy vs Token Count" style="width: 48%;">
 
 </div>
 
 ---
 
-### 4. **Language Mixing**
+### 5. **Language Mixing**
 - **Instruction-Tuned Model as Base Model**:
   - Rare occurrences of language mixing.
 - **Pretrained Model as Base Model**:
@@ -120,9 +126,10 @@ Note: The findings may be specific to this experimentation setup.
 
 ---
 
-### 5. **Stability of RL Algorithms**
-- **REINFORCE++** appears more stable than **GRPO**.  
-- Further experiments are expected to confirm this finding.  
+### 6. **RL Algorithm Stability**
+- **REINFORCE++** demonstrates greater stability compared to **GRPO** during training.  
+- Further experiments are required to validate this observation.  
+- For a technical comparison of **REINFORCE++**, **GRPO**, and **PPO**, see [this report](https://hijkzzz.notion.site/reinforce-plus-plus).
 
 ---
 
