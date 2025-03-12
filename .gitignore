@@ -1,3 +1,4 @@
 checkpoints/
 saved_models/
 wandb/
+outputs/
