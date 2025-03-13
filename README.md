@@ -4,7 +4,7 @@
 
 It leverages the following key components:
 
-1. RL Framework: **[veRL](https://github.com/volcengine/verl)**
+1. RL Framework: **[verl](https://github.com/volcengine/verl)**
 2. RL Algorithms: [**REINFORCE++**](https://arxiv.org/html/2501.03262v1) and [**GRPO**](https://arxiv.org/abs/2402.03300)
 3. RL Dataset: **[Knights and Knaves (K&K) Logic Puzzle Dataset](https://github.com/AlphaPav/mem-kk-logic)**
 4. Base Models: Qwen2.5 (3B), Llama3.2 (3B)
@@ -13,7 +13,7 @@ It leverages the following key components:
 
 ## Dataset
 
-**Knights and Knaves (K&K) Logic Puzzle**: Imagine there are two types of people: **Knights** and **Knaves**. Knights always tell the truth. Knaves always lie.  
+**Knights and Knaves (K&K) Logic Puzzle**: Imagine there are two types of people: **Knights** and **Knaves**. Knights always tell the truth. Knaves always lie.
 
 The K&K dataset is designed to test logical reasoning capabilities by presenting puzzles involving statements made by multiple "people," where the goal is to determine who is a knight and who is a knave based on the given clues.
 
@@ -42,12 +42,12 @@ For more visualized details, refer to my WandB report:
 Note: The findings may be specific to the experiment setups.
 
 ### 1. **Smallest Model Capable of Learning Reasoning**
-- **1.5B Models and Smaller**:
+- **1.5B Models and Smaller**
   - Instruction-tuned or pretrained models cannot learn reasoning.
-- **3B Models**:
-  - **Instruction-tuned models** (e.g., Qwen2.5-3B) can learn reasoning.
-  - **Pretrained models** (e.g., Llama3.2-3B) struggle to learn reasoning.
-- **7B Models and Larger**:
+- **3B Models**
+  - Instruction-tuned models: capable of learning reasoning.
+  - Pretrained models: mixed results — Llama3.2-3B struggles, while Qwen2.5-3B succeeds.
+- **7B Models and Larger**
   - Consistently learn reasoning.
 
 ---
@@ -84,29 +84,6 @@ Note: The findings may be specific to the experiment setups.
 | verify         | (0, 0)                         | 83             |           0.37 |
 | summarize      | (0, 0)                         | 73             |           0.33 |
 | summary        | (0, 1)                         | 251            |           1.13 |
-| aha            | N/A                            | 0              |           0.00 |
-| wait           | N/A                            | 0              |           0.00 |
-
-#### Table: Appearance of Self-Reflection, Verification and Summarization Keywords During Training (Base Model = Qwen2.5-3B)
-
-| Word           | First Occurrence (epoch, step) | Instances Found | Percentage (%) |
-|----------------|--------------------------------|----------------|----------------|
-| rethink        | N/A                            | 0              |           0.00 |
-| re-think       | N/A                            | 0              |           0.00 |
-| think again    | N/A                            | 0              |           0.00 |
-| retry          | N/A                            | 0              |           0.00 |
-| re-try         | N/A                            | 0              |           0.00 |
-| try again      | N/A                            | 0              |           0.00 |
-| recheck        | N/A                            | 0              |           0.00 |
-| re-check       | N/A                            | 0              |           0.00 |
-| check again    | N/A                            | 0              |           0.00 |
-| reevaluate     | N/A                            | 0              |           0.00 |
-| re-evaluate    | (0, 6)                         | 1              |           0.00 |
-| double check   | N/A                            | 0              |           0.00 |
-| double-check   | N/A                            | 0              |           0.00 |
-| verify         | N/A                            | 0              |           0.00 |
-| summarize      | N/A                            | 0              |           0.00 |
-| summary        | (0, 11)                        | 1              |           0.00 |
 | aha            | N/A                            | 0              |           0.00 |
 | wait           | N/A                            | 0              |           0.00 |
 
@@ -147,13 +124,6 @@ Note: The findings may be specific to the experiment setups.
 | Only Chinese           | 0 | 0.00% |
 | Mixed (English & Chinese) | 511 | 2.28% |
 
-#### Table: Language Distribution in Model Thinking (Base Model = Qwen2.5-3B)
-| Category               | Count | Percentage |
-|------------------------|-------|------------|
-| Only English           | 21888 | 97.85% |
-| Only Chinese           | 0 | 0.00% |
-| Mixed (English & Chinese) | 0 | 0.00% |
-
 ---
 
 ### 7. **REINFORCE++ Demonstrates Stability**
@@ -167,7 +137,7 @@ Note: The findings may be specific to the experiment setups.
 
 This project builds upon and references several open-source works:
 
-- **[veRL Framework](https://github.com/volcengine/verl)**: Reinforcement learning framework.
+- **[verl Framework](https://github.com/volcengine/verl)**: Reinforcement learning framework.
 - **[Logic-RL](https://github.com/Unakar/Logic-RL)**: Reproduction of R1-Zero on logic puzzles.
 - **[OAT-ZERO](https://github.com/sail-sg/oat-zero)**: Insights on reasoning with pure RL.
 - **[TinyZero](https://github.com/Jiayi-Pan/TinyZero)**: Implementation of reward models and Countdown task.
