@@ -42,6 +42,7 @@ For more visualized details, refer to my WandB report:
 Note: The findings may be specific to the experiment setups.
 
 ### 1. **Smallest Model Capable of Learning Reasoning**
+- The relationship between model scale and multi-step reasoning capability is discussed in [this paper](https://arxiv.org/abs/2206.07682). 
 - **1.5B Models and Smaller**
   - Instruction-tuned or pretrained models cannot learn reasoning.
 - **3B Models**
@@ -129,7 +130,7 @@ Note: The findings may be specific to the experiment setups.
 ### 7. **REINFORCE++ Demonstrates Stability**
 - **REINFORCE++** demonstrates greater stability compared to **GRPO** during training.  
 - Further experiments are required to validate this observation.  
-- For a technical comparison of **REINFORCE++**, **GRPO**, and **PPO**, see [this report](https://hijkzzz.notion.site/reinforce-plus-plus).
+- For a technical comparison of **REINFORCE++**, **GRPO**, and **PPO**, see [this report](https://arxiv.org/html/2501.03262v1).
 
 ---
 
